@@ -1,0 +1,98 @@
+---
+swagger: "2.0"
+info:
+  description: "DataScrapper API"
+  version: "0.0.1"
+  title: "CryptoDataScrapperAPI"
+  contact:
+    email: "alexandre@chirouze.tech"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "virtserver.swaggerhub.com"
+basePath: "/a6116/CryptoDataScrapperAPI/0.0.1"
+tags:
+- name: "Candlesticks methods"
+  description: "Ask API for Candlesticks data"
+schemes:
+- "https"
+paths:
+  /candlesticks/{crypto}/{step}/{dateStart}/{dateStop}:
+    get:
+      tags:
+      - "CandleSticks Data"
+      summary: "Get CandleStick past data"
+      description: "Access this route to get specific account info using userID"
+      operationId: "candlesticksCryptoStepDateStartDateStopGET"
+      consumes: []
+      produces:
+      - "application/json"
+      parameters:
+      - name: "crypto"
+        in: "path"
+        description: "Crypto chart needed"
+        required: true
+        type: "string"
+        format: "char"
+      - name: "step"
+        in: "path"
+        description: "can be 1d, 1h, 5m, 1m"
+        required: true
+        type: "string"
+        format: "char"
+      - name: "dateStart"
+        in: "path"
+        description: "Date of the first candlestick"
+        required: true
+        type: "string"
+        format: "char"
+      - name: "dateStop"
+        in: "path"
+        description: "Date of the last candlestick"
+        required: true
+        type: "string"
+        format: "char"
+      responses:
+        200:
+          description: "Candlestick Data"
+          schema:
+            $ref: "#/definitions/CandlestickData"
+        404:
+          description: "Not found"
+      x-swagger-router-controller: "CandleSticksData"
+definitions:
+  CandlestickData:
+    type: "object"
+    required:
+    - "close"
+    - "high"
+    - "low"
+    - "open"
+    - "volume"
+    properties:
+      open:
+        type: "number"
+        format: "float"
+        example: 115.85
+      close:
+        type: "number"
+        format: "float"
+        example: 116.02
+      high:
+        type: "number"
+        format: "float"
+        example: 116.51
+      low:
+        type: "number"
+        format: "float"
+        example: 115.75
+      volume:
+        type: "number"
+        format: "float"
+        example: 3585886.5
+    example:
+      volume: 3585886.5
+      high: 116.51
+      low: 115.75
+      close: 116.02
+      open: 115.85

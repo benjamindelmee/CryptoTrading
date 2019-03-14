@@ -24,7 +24,7 @@ def fetch_ohlcv(tf, limit, since):
     # adding one time interval because this api is returning us close times instead of open times
     closeDate = since + timedeltas[tf]
     result = client.Trade.Trade_getBucketed(
-        symbol="XBTUSD", reverse=False, count=limit, binSize=tf, startTime=closeDate).result()[0]
+        symbol="ETHUSD", reverse=False, count=limit, binSize=tf, startTime=closeDate).result()[0]
 
     candles = [candle for candle in result if candle["open"]]
 
@@ -58,15 +58,15 @@ def get_out_file(candle, tf):
     openDate = candle["openDate"]
     if tf == '1d':  # group by month
         month_date = datetime(openDate.year, openDate.month, 1)
-        return month_date.strftime("XBTUSD-%Y-%m-%d-{}.json".format(tf))
+        return month_date.strftime("ETHUSD-%Y-%m-%d-{}.json".format(tf))
 
     if tf == '1h':  # group by week
         week_date = openDate - timedelta(days=openDate.weekday())
-        return week_date.strftime("XBTUSD-%Y-%m-%d-{}.json".format(tf))
+        return week_date.strftime("ETHUSD-%Y-%m-%d-{}.json".format(tf))
 
     # group by day
     day_date = datetime(openDate.year, openDate.month, openDate.day)
-    return day_date.strftime("XBTUSD-%Y-%m-%d-{}.json".format(tf))
+    return day_date.strftime("ETHUSD-%Y-%m-%d-{}.json".format(tf))
 
 
 for tf in timedeltas.keys():
@@ -86,7 +86,7 @@ for tf in timedeltas.keys():
 
         if since != datetime(1970, 1, 1, tzinfo=timezone.utc):
             filename = os.path.join(args.outfolder, tf, since.strftime(
-                "XBTUSD-%Y-%m-%d-{}.json".format(tf)))
+                "ETHUSD-%Y-%m-%d-{}.json".format(tf)))
             with open(filename) as f:
                 d = json.load(f)
                 firstdate = datetime.utcfromtimestamp(d["openTimestamp"])

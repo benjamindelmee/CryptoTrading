@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 3hGQv25CRdQQb8Cy
+      POSTGRES_DB: bitmex
+
+  admin:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

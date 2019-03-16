@@ -9,8 +9,11 @@ services:
       POSTGRES_PASSWORD: 3hGQv25CRdQQb8Cy
       POSTGRES_DB: bitmex
 
-  admin:
+  dbadmin:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+    
+  app:
+    build: .

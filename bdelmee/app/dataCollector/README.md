@@ -1,8 +1,8 @@
 # Data Collector
 
 - Continuously reads data from the BitMEX websocket API
-- Right the data into a PostreSQL database
-- Make the data available through a REST API
+- Rights the data into a PostreSQL database
+- Makes the data available through a REST API
 
 ## Prerequisites
 

@@ -3,7 +3,7 @@ version: '3'
 services:
 
   db:
-    image: postgres
+    build: components/database
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 3hGQv25CRdQQb8Cy
@@ -16,6 +16,6 @@ services:
       - 8080:8080
     
   app:
-    build: .
+    build: components/collector
     environment:
       DB_HOST: db

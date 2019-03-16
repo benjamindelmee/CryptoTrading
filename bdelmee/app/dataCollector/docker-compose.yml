@@ -17,3 +17,5 @@ services:
     
   app:
     build: .
+    environment:
+      DB_HOST: db

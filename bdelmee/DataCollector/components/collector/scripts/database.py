@@ -46,6 +46,7 @@ class database(threading.Thread):
             'size': trade['data']['size'],
             'price': trade['data']['price']
         })
+        self.conn.commit()
 
     def _connect(self):
         # TODO: loop until connected

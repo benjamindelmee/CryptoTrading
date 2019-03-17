@@ -1,65 +1,100 @@
 import psycopg2
 import queue
 import threading
+import time
+import os
 
-class database(threading.Thread):
+# decorator
+def _connected_to_database(f):
+        def wrapper(*args, **kwargs):
+            args[0]._ensure_connection()
+            return f(*args, **kwargs)
+        return wrapper
+
+class Database(threading.Thread):
+    """Database abstraction used to insert data
+
+    When a call to a writeXXX() function is made, the data is put into a queue
+    and inserted asynchronously into the database (quickly after). When the method
+    close() is called, all the data in the queue are inserted into the database and
+    the connection is closed.
+    """
     
     def __init__(self):
-        super.__init__(self)
+        super(Database, self).__init__()
         self._init()
         self.start()
     
     def _init(self):
-        self.queue = queue.Queue(maxsize=5000)
-        self.conn_string = "host='{host}' dbname='{dbname}' user='{user}' password='{password}'".format(
-            # fallback values are used for development only
-            host = os.getenv('DB_HOST', '127.0.0.1'),
-            dbname = os.getenv('DB_NAME', 'db'),
-            user = os.getenv('DB_USER', 'user'),
-            password = os.getenv('DB_PASSWORD', '3hGQv25CRdQQb8Cy')
-        )
-    
-    def run(self):
-        while True:
-            item = self.queue.get(block=True)
-            if item['type'] == 'trade':
-                _writeTrade(item)
+        # queue to store the insert orders
+        self._queue = queue.Queue(maxsize=5000)
+
+        # database connection parameters
+        # fallback values are used for development only
+        self._host = os.getenv('DB_HOST', '127.0.0.1')
+        self._dbname = os.getenv('DB_NAME', 'bitmex')
+        self._user = os.getenv('DB_USER', 'user')
+        self._password = os.getenv('DB_PASSWORD', '3hGQv25CRdQQb8Cy')
+
+        # connector the database
+        self._conn = None
+
+        # tell if the connection must be considered as closed
+        self._closed = False
 
     def writeTrade(self, timestamp, symbol, side, size, price):
-        self.queue.put({
-            'type': 'trade',
-            'data': {
-                'timestamp': timestamp,
-                'symbol': symbol,
-                'side': side,
-                'size': size,
-                'price': price'
-            }
-        })
+        if not self._closed:
+            self._queue.put({
+                'type': 'trade',
+                'data': {
+                    'timestamp': timestamp,
+                    'symbol': symbol,
+                    'side': side,
+                    'size': size,
+                    'price': price
+                }
+            })
+
+    def close(self):
+        self._closed = True
+        self.join()
+        self._conn.close()
+
+    # no need to call this method by yourself
+    # automatically executed into a new thread
+    def run(self):
+        while True:
+            try:
+                item = self._queue.get(block=True, timeout=1)
+                if item['type'] == 'trade':
+                    self._writeTrade(item)
+            except queue.Empty:
+                if self._closed:
+                    # empty queue and thread waiting to be closed... leave
+                    break
     
     @_connected_to_database
     def _writeTrade(self, trade):
-        self.cursor.execute('INSERT INTO trades (timestamp, symbol, side, size, price) VALUES (%(timestamp)s, %(symbol)s, %(side)s, %(size)s, %(price)s)', {
-            'timestamp': trade['data']['timestamp'],
-            'symbol': trade['data']['symbol'],
-            'side': trade['data']['side'],
-            'size': trade['data']['size'],
-            'price': trade['data']['price']
-        })
-        self.conn.commit()
+        with self._conn.cursor() as cursor:
+            cursor.execute('INSERT INTO trades (timestamp, symbol, side, size, price) VALUES (%(timestamp)s, %(symbol)s, %(side)s, %(size)s, %(price)s)', {
+                'timestamp': trade['data']['timestamp'],
+                'symbol': trade['data']['symbol'],
+                'side': trade['data']['side'],
+                'size': trade['data']['size'],
+                'price': trade['data']['price']
+            })
+            self._conn.commit()
 
-    def _connect(self):
-        # TODO: loop until connected
-        
-        # # get a connection, if a connect cannot be made an exception will be raised here
-        # conn = psycopg2.connect(conn_string)
-
-        # # conn.cursor will return a cursor object, you can use this cursor to perform queries
-        # cursor = conn.cursor()
-        pass
-
-    def _connected_to_database(f):
-        def wrapper(*args, **kwargs):
-            args[0]._connect()
-            return f(*args, **kwargs)
-        return wrapper
+    def _ensure_connection(self):
+        while self._conn == None or self._conn.closed != 0:  # if not already connected
+            try:
+                self._conn = psycopg2.connect(
+                    host=self._host,
+                    dbname=self._dbname,
+                    user=self._user,
+                    password=self._password
+                )
+                print('Connected to database')
+            except psycopg2.Error as err:
+                print('Database Error ({}): impossible to connect. Trying again in 5s...'.format(type(err)))
+                time.sleep(5)

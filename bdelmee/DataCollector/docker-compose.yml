@@ -19,3 +19,6 @@ services:
     build: components/collector
     environment:
       DB_HOST: db
+      DB_NAME: bitmex
+      DB_USER: user
+      DB_PASSWORD: 3hGQv25CRdQQb8Cy

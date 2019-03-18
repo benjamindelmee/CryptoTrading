@@ -57,11 +57,15 @@ class Database(threading.Thread):
 
     def close(self):
         self._closed = True
+        # wait for the last insertions to be performed
         self.join()
-        self._conn.close()
+        if self._conn:
+            self._conn.close()
+            print('Dabase: disconnected')
 
     # no need to call this method by yourself
     # automatically executed into a new thread
+    @_connected_to_database
     def run(self):
         while True:
             try:
@@ -86,7 +90,7 @@ class Database(threading.Thread):
             self._conn.commit()
 
     def _ensure_connection(self):
-        while self._conn == None or self._conn.closed != 0:  # if not already connected
+        while not self._closed and (self._conn == None or self._conn.closed != 0):  # if not already connected
             try:
                 self._conn = psycopg2.connect(
                     host=self._host,
@@ -94,7 +98,7 @@ class Database(threading.Thread):
                     user=self._user,
                     password=self._password
                 )
-                print('Connected to database')
+                print('Database: connected')
             except psycopg2.Error as err:
-                print('Database Error ({}): impossible to connect. Trying again in 5s...'.format(type(err)))
+                print('Database: {} impossible to connect. Trying again in 5s...'.format(type(err)))
                 time.sleep(5)

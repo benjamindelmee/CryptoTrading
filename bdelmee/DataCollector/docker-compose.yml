@@ -22,3 +22,4 @@ services:
       DB_NAME: bitmex
       DB_USER: user
       DB_PASSWORD: 3hGQv25CRdQQb8Cy
+      PYTHONUNBUFFERED: 1

@@ -7,7 +7,7 @@ if __name__ == '__main__':
     try:
         database = database.Database()
         stream = bitmexStream.Stream(database)
-        
+
         while True:
             time.sleep(1000)
 

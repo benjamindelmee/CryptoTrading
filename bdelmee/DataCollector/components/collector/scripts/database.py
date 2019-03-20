@@ -67,7 +67,7 @@ class Database(threading.Thread):
     # automatically executed into a new thread
     @_connected_to_database
     def run(self):
-        while True:
+        while not self._closed:
             try:
                 item = self._queue.get(block=True, timeout=1)
                 if item['type'] == 'trade':

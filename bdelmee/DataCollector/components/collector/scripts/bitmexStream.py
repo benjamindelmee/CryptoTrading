@@ -5,7 +5,7 @@ import json
 
 class Stream(threading.Thread):
 
-    url = 'xwss://www.bitmex.com/realtime?subscribe=trade:XBTUSD'
+    url = 'wss://www.bitmex.com/realtime?subscribe=trade:XBTUSD'
 
     def __init__(self, database):
         super(Stream, self).__init__()
@@ -30,7 +30,7 @@ class Stream(threading.Thread):
     # no need to call this method by yourself
     # automatically executed into a new thread
     def run(self):
-        while True:
+        while not self._closed:
             self._ws.run_forever()            
             
             if self._closed:
@@ -42,8 +42,10 @@ class Stream(threading.Thread):
 
     def _on_message(self, message):
         data = json.loads(message)
-        # TODO
-        # # self._database.writeTrade(data['data'])
+        if 'table' in data:
+            if data['table'] == 'trade' and data['action'] == 'insert':
+                for trade in data['data']:
+                    self._database.writeTrade(trade['timestamp'], trade['symbol'], trade['side'], trade['size'], trade['price']) 
 
     def _on_error(self, error):
         print('BitMEX: ' + str(error))

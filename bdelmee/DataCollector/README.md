@@ -15,7 +15,7 @@ You need to install **docker** and **docker-compose** ([see documentation](https
 cd dataCollector
 
 # run the application using docker
-docker-compose -f docker-compose.yml up
+make start
 ```
 ## Development
 
@@ -24,5 +24,5 @@ docker-compose -f docker-compose.yml up
 cd dataCollector
 
 # run the application using docker
-docker-compose up
+make startdev
 ```

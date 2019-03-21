@@ -8,12 +8,6 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 3hGQv25CRdQQb8Cy
       POSTGRES_DB: bitmex
-
-  dbadmin:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
     
   collector:
     build: components/collector

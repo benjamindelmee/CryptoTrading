@@ -6,12 +6,12 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8001:8080
   
   swagger:
     image: swaggerapi/swagger-ui
     ports:
-      - "8080:8080"
+      - "8002:8080"
     volumes:
       - ./components/api/swagger/swagger.yml:/docs/swagger.yml:ro
     environment:

@@ -56,12 +56,16 @@ class Database(threading.Thread):
             })
 
     def close(self):
-        self._closed = True
-        # wait for the last insertions to be performed
-        self.join()
-        if self._conn:
-            self._conn.close()
-            print('Dabase: disconnected')
+        if self._closed:
+            # do not execute if already closed
+            return
+        else:
+            self._closed = True
+            # wait for the last insertions to be performed
+            self.join()
+            if self._conn:
+                self._conn.close()
+                print('Dabase: disconnected')
 
     # no need to call this method by yourself
     # automatically executed into a new thread

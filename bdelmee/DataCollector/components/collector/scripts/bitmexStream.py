@@ -23,9 +23,13 @@ class Stream(threading.Thread):
         )
 
     def close(self):
-        self._closed = True
-        self._ws.close()
-        self.join()
+        if self._closed:
+            # do not execute if already closed
+            return
+        else:
+            self._closed = True
+            self._ws.close()
+            self.join()
 
     # no need to call this method by yourself
     # automatically executed into a new thread

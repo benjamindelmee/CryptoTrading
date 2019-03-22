@@ -16,6 +16,9 @@ cd dataCollector
 
 # run the application using docker
 make start
+
+# to stop the application
+# make stop
 ```
 ## Development
 
@@ -25,4 +28,11 @@ cd dataCollector
 
 # run the application using docker
 make startdev
+
+# stop the application
+ctrl + c
 ```
+
+## Data location
+
+The data are stored in the folder `./components/database/data`

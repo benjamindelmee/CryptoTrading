@@ -4,6 +4,8 @@ services:
 
   db:
     build: components/database
+    volumes:
+      - ./components/database/data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 3hGQv25CRdQQb8Cy

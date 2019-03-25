@@ -94,7 +94,28 @@ class Database(threading.Thread):
             self._conn.commit()
 
     def _ensure_connection(self):
-        while not self._closed and (self._conn == None or self._conn.closed != 0):  # if not already connected
+
+        # bug in psycopg2: the .closed attribute isn't updated when the connection is close by the server
+        # patch: begin
+        try:
+            if self._conn != None:
+
+                # do a random operation
+                # if an error is raised, then the connexion is closed
+                self._conn.poll()
+
+                # if this code is reached, the connexion is open
+                monkey_patch = False
+
+            else:
+                monkey_patch = True
+
+        except psycopg2.OperationalError:
+            monkey_patch = True
+        # patch: end
+
+        #while not self._closed and (self._conn == None or self._conn.closed != 0):
+        while not self._closed and (self._conn == None or monkey_patch):  # if not already connected
             try:
                 self._conn = psycopg2.connect(
                     host=self._host,
@@ -103,6 +124,7 @@ class Database(threading.Thread):
                     password=self._password
                 )
                 print('Database: connected')
+                monkey_patch = False
             except psycopg2.Error as err:
                 print('Database: {} impossible to connect. Trying again in 5s...'.format(type(err)))
                 time.sleep(5)

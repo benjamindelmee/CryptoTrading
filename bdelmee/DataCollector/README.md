@@ -50,6 +50,8 @@ docker-compose down db
 docker-compose up db
 ```
 
+*Note: when turning off and on the database, the collector component may take a bit of time (1~2 minutes) to reconnect to the database. Be patient, the data collected during this timeframe are kept safe in the collector's buffer.*
+
 ## Data location
 
 The data are stored in the folder `./components/database/data`
